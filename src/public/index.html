@@ -1,0 +1,422 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Panel de Licencias - Bot WhatsApp</title>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
+<link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.11.0/font/bootstrap-icons.min.css" rel="stylesheet">
+<style>
+:root {
+    --bg: #0a0e1a; --card: #101828; --elevated: #1a2236;
+    --accent: #25d366; --border: rgba(255,255,255,.07);
+    --text: #f1f5f9; --muted: #64748b;
+}
+* { box-sizing: border-box; }
+body { background: var(--bg); color: var(--text); font-family: 'Segoe UI', sans-serif; margin: 0; }
+.navbar { background: rgba(10,14,26,.95); border-bottom: 1px solid var(--border); padding: .75rem 1.5rem; }
+.navbar-brand { color: var(--accent) !important; font-weight: 800; }
+.card { background: var(--card); border: 1px solid var(--border); border-radius: 16px; }
+.card-header { background: var(--elevated); border-bottom: 1px solid var(--border); border-radius: 16px 16px 0 0 !important; }
+.stat-card { background: var(--card); border: 1px solid var(--border); border-radius: 16px; padding: 1.25rem; text-align: center; }
+.stat-card .valor { font-size: 2rem; font-weight: 800; color: var(--accent); }
+.stat-card .label { font-size: .75rem; color: var(--muted); text-transform: uppercase; letter-spacing: .05em; }
+.btn-primary { background: linear-gradient(135deg, #25d366, #128c7e); border: none; }
+.btn-primary:hover { background: linear-gradient(135deg, #22c55e, #0f766e); }
+.btn-danger { background: linear-gradient(135deg, #ef4444, #dc2626); border: none; }
+.btn-success { background: linear-gradient(135deg, #25d366, #128c7e); border: none; }
+.form-control, .form-select { background: var(--elevated) !important; border: 1px solid var(--border); color: var(--text) !important; border-radius: 10px; }
+.form-control:focus, .form-select:focus { border-color: rgba(37,211,102,.5); box-shadow: 0 0 0 3px rgba(37,211,102,.1); }
+.modal-content { background: var(--card); border: 1px solid var(--border); border-radius: 20px; color: var(--text); }
+.modal-header { border-bottom: 1px solid var(--border); }
+.modal-footer { border-top: 1px solid var(--border); }
+.badge-activo { background: rgba(37,211,102,.15); color: #4ade80; border: 1px solid rgba(37,211,102,.3); padding: .3rem .7rem; border-radius: 8px; font-size: .75rem; font-weight: 700; }
+.badge-inactivo { background: rgba(239,68,68,.15); color: #f87171; border: 1px solid rgba(239,68,68,.3); padding: .3rem .7rem; border-radius: 8px; font-size: .75rem; font-weight: 700; }
+.badge-vence { background: rgba(245,158,11,.15); color: #fbbf24; border: 1px solid rgba(245,158,11,.3); padding: .3rem .7rem; border-radius: 8px; font-size: .75rem; font-weight: 700; }
+table { color: var(--text) !important; }
+th { background: var(--elevated); color: var(--muted) !important; font-size: .75rem; text-transform: uppercase; letter-spacing: .05em; border-color: var(--border) !important; }
+td { border-color: var(--border) !important; vertical-align: middle; }
+tr:hover td { background: rgba(37,211,102,.04) !important; }
+.login-box { max-width: 420px; margin: 0 auto; padding: 3rem 2rem; background: var(--card); border: 1px solid var(--border); border-radius: 24px; box-shadow: 0 32px 64px rgba(0,0,0,.4); animation: fadeIn .4s ease; }
+@keyframes fadeIn { from { opacity:0; transform:translateY(20px); } to { opacity:1; transform:translateY(0); } }
+.clave-box { background: var(--elevated); border: 1px solid rgba(37,211,102,.3); border-radius: 10px; padding: .5rem 1rem; font-family: monospace; font-size: .9rem; color: var(--accent); cursor: pointer; }
+.clave-box:hover { background: rgba(37,211,102,.1); }
+::-webkit-scrollbar { width: 6px; } ::-webkit-scrollbar-track { background: transparent; } ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+</style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div id="loginView" style="min-height:100vh;display:flex;align-items:center;justify-content:center;background:radial-gradient(ellipse at 20% 50%,rgba(37,211,102,.06) 0%,transparent 60%)">
+    <div class="login-box">
+        <div class="text-center mb-4">
+            <div style="font-size:3rem;filter:drop-shadow(0 0 20px rgba(37,211,102,.5))">🤖</div>
+            <h3 class="mt-2 mb-1" style="color:var(--accent)">Panel de Licencias</h3>
+            <p style="color:var(--muted)">Bot WhatsApp - Control de Clientes</p>
+        </div>
+        <div class="mb-3">
+            <label class="form-label" style="color:var(--muted);font-size:.8rem;text-transform:uppercase;letter-spacing:.05em">Usuario</label>
+            <input type="text" id="loginUser" class="form-control" placeholder="admin">
+        </div>
+        <div class="mb-4">
+            <label class="form-label" style="color:var(--muted);font-size:.8rem;text-transform:uppercase;letter-spacing:.05em">Contraseña</label>
+            <input type="password" id="loginPass" class="form-control" placeholder="••••••••" onkeypress="if(event.key==='Enter')login()">
+        </div>
+        <button class="btn btn-primary w-100 py-2 fw-bold" onclick="login()">Entrar</button>
+        <div id="loginError" class="text-danger mt-3 text-center small"></div>
+    </div>
+</div>
+
+<!-- PANEL PRINCIPAL -->
+<div id="mainView" style="display:none">
+    <nav class="navbar sticky-top">
+        <div class="container-fluid">
+            <span class="navbar-brand"><i class="bi bi-robot me-2"></i>Panel de Licencias</span>
+            <div class="d-flex gap-2 align-items-center">
+                <span style="color:var(--muted);font-size:.85rem" id="navUser"></span>
+                <button class="btn btn-sm btn-outline-secondary" onclick="logout()"><i class="bi bi-box-arrow-right"></i></button>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container-fluid py-4 px-4">
+        <!-- STATS -->
+        <div class="row g-3 mb-4" id="statsRow">
+            <div class="col-6 col-md-3"><div class="stat-card"><div class="valor" id="s-total">-</div><div class="label">Total clientes</div></div></div>
+            <div class="col-6 col-md-3"><div class="stat-card"><div class="valor" id="s-activos">-</div><div class="label">Activos</div></div></div>
+            <div class="col-6 col-md-3"><div class="stat-card"><div class="valor" style="color:#f87171" id="s-vencen">-</div><div class="label">Vencen hoy</div></div></div>
+            <div class="col-6 col-md-3"><div class="stat-card"><div class="valor" style="color:#4ade80" id="s-ingreso">-</div><div class="label">Ingreso este mes</div></div></div>
+        </div>
+
+        <!-- TABLA CLIENTES -->
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center py-3">
+                <span class="fw-bold"><i class="bi bi-people me-2"></i>Clientes</span>
+                <button class="btn btn-primary btn-sm" onclick="abrirNuevoCliente()">
+                    <i class="bi bi-plus-lg me-1"></i>Nuevo cliente
+                </button>
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover mb-0">
+                        <thead>
+                            <tr>
+                                <th class="ps-3">Cliente</th>
+                                <th>Teléfono</th>
+                                <th>Tipo bot</th>
+                                <th>Plan</th>
+                                <th>Vencimiento</th>
+                                <th>Estado</th>
+                                <th>Clave licencia</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tablaClientes"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- MODAL NUEVO CLIENTE -->
+<div class="modal fade" id="modalNuevo" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title"><i class="bi bi-person-plus me-2"></i>Nuevo cliente</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="row g-3">
+                    <div class="col-12">
+                        <label class="form-label small text-secondary">Nombre del cliente</label>
+                        <input type="text" class="form-control" id="n-nombre" placeholder="Nombre completo o negocio">
+                    </div>
+                    <div class="col-6">
+                        <label class="form-label small text-secondary">Teléfono</label>
+                        <input type="text" class="form-control" id="n-telefono" placeholder="5512345678">
+                    </div>
+                    <div class="col-6">
+                        <label class="form-label small text-secondary">WhatsApp admin del bot</label>
+                        <input type="text" class="form-control" id="n-whatsapp" placeholder="521XXXXXXXXXX">
+                    </div>
+                    <div class="col-6">
+                        <label class="form-label small text-secondary">Tipo de bot</label>
+                        <select class="form-select" id="n-tipo">
+                            <option value="sin_marco">Sin marco</option>
+                            <option value="con_marco">Con marco</option>
+                        </select>
+                    </div>
+                    <div class="col-6">
+                        <label class="form-label small text-secondary">Plan</label>
+                        <select class="form-select" id="n-plan">
+                            <option value="semanal">Semanal - $1,000</option>
+                            <option value="mensual">Mensual - $3,500</option>
+                        </select>
+                    </div>
+                    <div class="col-6">
+                        <label class="form-label small text-secondary">Precio ($MXN)</label>
+                        <input type="number" class="form-control" id="n-precio" value="1000">
+                    </div>
+                    <div class="col-12">
+                        <label class="form-label small text-secondary">Notas</label>
+                        <input type="text" class="form-control" id="n-notas" placeholder="Notas adicionales...">
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button class="btn btn-primary" onclick="crearCliente()"><i class="bi bi-check-lg me-1"></i>Crear cliente</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- MODAL RENOVAR -->
+<div class="modal fade" id="modalRenovar" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title"><i class="bi bi-arrow-clockwise me-2"></i>Renovar licencia</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p>Cliente: <strong id="r-nombre"></strong></p>
+                <input type="hidden" id="r-id">
+                <div class="mb-3">
+                    <label class="form-label small text-secondary">Monto recibido ($MXN)</label>
+                    <input type="number" class="form-control" id="r-monto" placeholder="1000">
+                </div>
+                <div class="mb-3">
+                    <label class="form-label small text-secondary">Notas del pago</label>
+                    <input type="text" class="form-control" id="r-notas" placeholder="Transferencia, efectivo...">
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button class="btn btn-success" onclick="renovar()"><i class="bi bi-check-lg me-1"></i>Registrar pago y renovar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- MODAL CLAVE -->
+<div class="modal fade" id="modalClave" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered modal-sm">
+        <div class="modal-content text-center">
+            <div class="modal-header justify-content-center border-0 pb-0">
+                <h5 class="modal-title">✅ Cliente creado</h5>
+            </div>
+            <div class="modal-body pt-2">
+                <p class="text-secondary small mb-3">Clave de licencia del cliente:</p>
+                <div class="clave-box mb-3" id="claveMostrada" onclick="copiarClave()"></div>
+                <p class="text-secondary" style="font-size:.75rem">Haz clic para copiar. Esta clave se ingresa durante la instalación del bot.</p>
+            </div>
+            <div class="modal-footer justify-content-center border-0 pt-0">
+                <button class="btn btn-primary" data-bs-dismiss="modal">Entendido</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+<script>
+let token = localStorage.getItem('lic_token');
+let clientes = [];
+const API = window.location.origin;
+
+if (token) mostrarPanel();
+
+async function api(path, opts = {}) {
+    const r = await fetch(API + path, {
+        headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+        ...opts
+    });
+    return r.json();
+}
+
+async function login() {
+    const username = document.getElementById('loginUser').value;
+    const password = document.getElementById('loginPass').value;
+    
+    const r = await fetch(API + '/api/admin/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username, password })
+    });
+    const d = await r.json();
+    
+    if (d.token) {
+        token = d.token;
+        localStorage.setItem('lic_token', token);
+        document.getElementById('navUser').textContent = d.username;
+        mostrarPanel();
+    } else {
+        document.getElementById('loginError').textContent = 'Credenciales incorrectas';
+    }
+}
+
+function logout() {
+    localStorage.removeItem('lic_token');
+    token = null;
+    document.getElementById('loginView').style.display = 'flex';
+    document.getElementById('mainView').style.display = 'none';
+}
+
+function mostrarPanel() {
+    document.getElementById('loginView').style.display = 'none';
+    document.getElementById('mainView').style.display = 'block';
+    cargarTodo();
+}
+
+async function cargarTodo() {
+    const [stats, lista] = await Promise.all([
+        api('/api/admin/stats'),
+        api('/api/admin/clientes')
+    ]);
+    
+    document.getElementById('s-total').textContent = stats.total || 0;
+    document.getElementById('s-activos').textContent = stats.activos || 0;
+    document.getElementById('s-vencen').textContent = stats.vencenHoy || 0;
+    document.getElementById('s-ingreso').textContent = '$' + (stats.ingresoMes || 0).toLocaleString();
+    
+    clientes = lista;
+    renderTabla(lista);
+}
+
+function renderTabla(lista) {
+    const tbody = document.getElementById('tablaClientes');
+    if (!lista.length) { tbody.innerHTML = '<tr><td colspan="8" class="text-center py-4 text-secondary">No hay clientes aún</td></tr>'; return; }
+    
+    tbody.innerHTML = lista.map(c => {
+        const vence = c.lic_vencimiento ? new Date(c.lic_vencimiento) : null;
+        const hoy = new Date();
+        const diasRestantes = vence ? Math.ceil((vence - hoy) / 86400000) : null;
+        
+        let estadoBadge;
+        if (!c.activo || !c.licencia_activa) {
+            estadoBadge = '<span class="badge-inactivo">❌ Suspendido</span>';
+        } else if (diasRestantes !== null && diasRestantes <= 1) {
+            estadoBadge = '<span class="badge-vence">⚠️ Vence hoy</span>';
+        } else if (diasRestantes !== null && diasRestantes <= 3) {
+            estadoBadge = '<span class="badge-vence">⚠️ ' + diasRestantes + ' días</span>';
+        } else {
+            estadoBadge = '<span class="badge-activo">✅ Activo</span>';
+        }
+        
+        const fechaVence = vence ? vence.toLocaleDateString('es-MX', {day:'2-digit',month:'short',year:'2-digit'}) : '-';
+        
+        return `<tr>
+            <td class="ps-3"><div class="fw-semibold">${c.nombre}</div><small class="text-secondary">${c.telefono}</small></td>
+            <td><small>${c.whatsapp_admin}</small></td>
+            <td><span class="badge bg-secondary">${c.tipo_bot === 'con_marco' ? 'Con marco' : 'Sin marco'}</span></td>
+            <td><small class="text-secondary">${c.plan}</small></td>
+            <td><small>${fechaVence}</small></td>
+            <td>${estadoBadge}</td>
+            <td>
+                <div class="clave-box" style="font-size:.75rem;padding:.3rem .6rem" onclick="copiarTexto('${c.clave}',this)" title="Clic para copiar">
+                    ${c.clave || 'Sin clave'}
+                </div>
+            </td>
+            <td>
+                <div class="d-flex gap-1">
+                    <button class="btn btn-sm ${c.activo ? 'btn-danger' : 'btn-success'}" 
+                        onclick="toggleCliente(${c.id}, '${c.nombre}')" title="${c.activo ? 'Suspender' : 'Activar'}">
+                        <i class="bi ${c.activo ? 'bi-pause-fill' : 'bi-play-fill'}"></i>
+                    </button>
+                    <button class="btn btn-sm btn-primary" onclick="abrirRenovar(${c.id}, '${c.nombre}', ${c.precio})" title="Registrar pago">
+                        <i class="bi bi-arrow-clockwise"></i>
+                    </button>
+                    <button class="btn btn-sm btn-outline-secondary" onclick="eliminar(${c.id})" title="Eliminar">
+                        <i class="bi bi-trash"></i>
+                    </button>
+                </div>
+            </td>
+        </tr>`;
+    }).join('');
+}
+
+function abrirNuevoCliente() {
+    document.getElementById('n-plan').addEventListener('change', function() {
+        document.getElementById('n-precio').value = this.value === 'mensual' ? 3500 : 1000;
+    });
+    new bootstrap.Modal(document.getElementById('modalNuevo')).show();
+}
+
+async function crearCliente() {
+    const d = {
+        nombre: document.getElementById('n-nombre').value,
+        telefono: document.getElementById('n-telefono').value,
+        whatsapp_admin: document.getElementById('n-whatsapp').value,
+        tipo_bot: document.getElementById('n-tipo').value,
+        plan: document.getElementById('n-plan').value,
+        precio: parseFloat(document.getElementById('n-precio').value),
+        notas: document.getElementById('n-notas').value
+    };
+    
+    if (!d.nombre || !d.telefono || !d.whatsapp_admin) { alert('Llena todos los campos requeridos'); return; }
+    
+    const r = await api('/api/admin/clientes', { method: 'POST', body: JSON.stringify(d) });
+    
+    if (r.success) {
+        bootstrap.Modal.getInstance(document.getElementById('modalNuevo')).hide();
+        document.getElementById('claveMostrada').textContent = r.clave_licencia;
+        new bootstrap.Modal(document.getElementById('modalClave')).show();
+        cargarTodo();
+    } else {
+        alert('Error: ' + r.error);
+    }
+}
+
+async function toggleCliente(id, nombre) {
+    const accion = confirm(`¿${clientes.find(c=>c.id===id)?.activo ? 'SUSPENDER' : 'ACTIVAR'} al cliente "${nombre}"?`);
+    if (!accion) return;
+    
+    const r = await api('/api/admin/clientes/' + id + '/toggle', { method: 'POST' });
+    if (r.success) {
+        alert(r.mensaje);
+        cargarTodo();
+    }
+}
+
+function abrirRenovar(id, nombre, precio) {
+    document.getElementById('r-id').value = id;
+    document.getElementById('r-nombre').textContent = nombre;
+    document.getElementById('r-monto').value = precio;
+    new bootstrap.Modal(document.getElementById('modalRenovar')).show();
+}
+
+async function renovar() {
+    const id = document.getElementById('r-id').value;
+    const monto = document.getElementById('r-monto').value;
+    const notas = document.getElementById('r-notas').value;
+    
+    const r = await api('/api/admin/clientes/' + id + '/renovar', { method: 'POST', body: JSON.stringify({ monto, notas }) });
+    if (r.success) {
+        bootstrap.Modal.getInstance(document.getElementById('modalRenovar')).hide();
+        alert('✅ Pago registrado. Nueva fecha: ' + new Date(r.nueva_fecha).toLocaleDateString('es-MX'));
+        cargarTodo();
+    }
+}
+
+async function eliminar(id) {
+    if (!confirm('¿Eliminar este cliente? Se borrará toda su información.')) return;
+    await api('/api/admin/clientes/' + id, { method: 'DELETE' });
+    cargarTodo();
+}
+
+function copiarClave() {
+    const txt = document.getElementById('claveMostrada').textContent.trim();
+    navigator.clipboard.writeText(txt);
+}
+
+function copiarTexto(txt, el) {
+    navigator.clipboard.writeText(txt);
+    const orig = el.textContent;
+    el.textContent = '✅ Copiado';
+    setTimeout(() => el.textContent = orig, 1500);
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,20 @@
+# ─── BASE DE DATOS ───────────────────────────────────────────────
+DB_HOST=127.0.0.1
+DB_PORT=3306
+DB_USER=root
+DB_PASSWORD=
+DB_NAME=whatsapp_bot
+
+# ─── API ENMARCADO ───────────────────────────────────────────────
+API_URL=http://localhost:5000/api
+MODO_ENMARCADO=true
+
+# ─── LICENCIA ────────────────────────────────────────────────────
+# Clave generada cuando se crea el cliente en tu panel de licencias
+CLAVE_LICENCIA=BOT-XXXXXXXX-XXXXXX
+
+# URL de tu servidor de licencias (Railway u otro)
+SERVIDOR_LICENCIAS=https://tu-servidor.railway.app
+
+# Número WhatsApp del admin (para avisar si se suspende)
+ADMIN_WHATSAPP=521XXXXXXXXXX
