@@ -402,8 +402,22 @@ async function renovar() {
 
 async function eliminar(id) {
     if (!confirm('¿Eliminar este cliente? Se borrará toda su información.')) return;
-    await api('/api/admin/clientes/' + id, { method: 'DELETE' });
-    cargarTodo();
+    try {
+        const r = await fetch('/api/admin/clientes/' + id, {
+            method: 'DELETE',
+            headers: { 
+                'Content-Type': 'application/json',
+                'Authorization': 'Bearer ' + token 
+            }
+        });
+        if (r.ok) {
+            await cargarTodo();
+        } else {
+            alert('Error al eliminar');
+        }
+    } catch(e) {
+        alert('Error: ' + e.message);
+    }
 }
 
 function copiarClave() {
