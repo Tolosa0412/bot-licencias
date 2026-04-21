@@ -26,7 +26,7 @@ app.get('/api/licencia/:clave', async (req, res) => {
         const r = await db.execute({ sql: 'SELECT l.*, c.nombre, c.tipo_bot, c.activo as cliente_activo FROM licencias l JOIN clientes c ON l.cliente_id = c.id WHERE l.clave = ?', args: [clave] });
         const lic = r.rows[0];
         if (!lic) return res.json({ activa: false, motivo: 'No encontrada' });
-        await db.execute({ sql: 'UPDATE licencias SET ultimo_check = datetime("now") WHERE clave = ?', args: [clave] });
+        await db.execute({ sql: 'UPDATE licencias SET ultimo_check = CURRENT_TIMESTAMP WHERE clave = ?', args: [clave] });
         if (!lic.activa || !lic.cliente_activo) return res.json({ activa: false, motivo: 'Suspendida' });
         if (lic.fecha_vencimiento && new Date(lic.fecha_vencimiento) < new Date()) return res.json({ activa: false, motivo: 'Vencida' });
         res.json({ activa: true, cliente: lic.nombre, tipo_bot: lic.tipo_bot });
@@ -54,7 +54,7 @@ app.post('/api/admin/clientes', auth, async (req, res) => {
         if (!nombre || !telefono || !whatsapp_admin) return res.status(400).json({ error: 'Datos requeridos' });
         const venc = new Date();
         plan === 'mensual' ? venc.setMonth(venc.getMonth() + 1) : venc.setDate(venc.getDate() + 7);
-        const ins = await db.execute({ sql: "INSERT INTO clientes (nombre, telefono, whatsapp_admin, tipo_bot, plan, precio, notas, fecha_vencimiento, fecha_ultimo_pago) VALUES (?,?,?,?,?,?,?,?,datetime('now'))", args: [nombre, telefono, whatsapp_admin, tipo_bot||'sin_marco', plan||'semanal', precio||1000, notas||'', venc.toISOString()] });
+        const ins = await db.execute({ sql: "INSERT INTO clientes (nombre, telefono, whatsapp_admin, tipo_bot, plan, precio, notas, fecha_vencimiento, fecha_ultimo_pago) VALUES (?,?,?,?,?,?,?,?,CURRENT_TIMESTAMP)", args: [nombre, telefono, whatsapp_admin, tipo_bot||'sin_marco', plan||'semanal', precio||1000, notas||'', venc.toISOString()] });
         const clave = 'BOT-' + uuidv4().toUpperCase().slice(0,8) + '-' + Date.now().toString(36).toUpperCase();
         await db.execute({ sql: 'INSERT INTO licencias (cliente_id, clave, activa, fecha_vencimiento) VALUES (?,?,1,?)', args: [ins.lastInsertRowid, clave, venc.toISOString()] });
         res.json({ success: true, clave_licencia: clave });
@@ -101,7 +101,7 @@ app.post('/api/admin/clientes/clave-especifica', auth, async (req, res) => {
         if (!nombre || !telefono || !whatsapp_admin || !clave_especifica) return res.status(400).json({ error: 'Datos requeridos' });
         const venc = new Date();
         plan === 'mensual' ? venc.setMonth(venc.getMonth() + 1) : venc.setDate(venc.getDate() + 7);
-        const ins = await db.execute({ sql: "INSERT INTO clientes (nombre, telefono, whatsapp_admin, tipo_bot, plan, precio, notas, fecha_vencimiento, fecha_ultimo_pago) VALUES (?,?,?,?,?,?,?,?,datetime('now'))", args: [nombre, telefono, whatsapp_admin, tipo_bot||'con_marco', plan||'semanal', precio||1000, '', venc.toISOString()] });
+        const ins = await db.execute({ sql: "INSERT INTO clientes (nombre, telefono, whatsapp_admin, tipo_bot, plan, precio, notas, fecha_vencimiento, fecha_ultimo_pago) VALUES (?,?,?,?,?,?,?,?,CURRENT_TIMESTAMP)", args: [nombre, telefono, whatsapp_admin, tipo_bot||'con_marco', plan||'semanal', precio||1000, '', venc.toISOString()] });
         await db.execute({ sql: 'INSERT INTO licencias (cliente_id, clave, activa, fecha_vencimiento) VALUES (?,?,1,?)', args: [ins.lastInsertRowid, clave_especifica, venc.toISOString()] });
         res.json({ success: true, clave_licencia: clave_especifica });
     } catch(e) { res.status(500).json({ error: e.message }); }
