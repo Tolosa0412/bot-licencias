@@ -93,5 +93,18 @@ app.get('/api/admin/stats', auth, async (req, res) => {
         res.json({ total, activos, inactivos: total-activos, ingresoMes: ingreso });
     } catch(e) { res.status(500).json({ error: e.message }); }
 });
+
+// ENDPOINT ESPECIAL: crear cliente con clave especifica
+app.post('/api/admin/clientes/clave-especifica', auth, async (req, res) => {
+    try {
+        const { nombre, telefono, whatsapp_admin, tipo_bot, plan, precio, clave_especifica } = req.body;
+        if (!nombre || !telefono || !whatsapp_admin || !clave_especifica) return res.status(400).json({ error: 'Datos requeridos' });
+        const venc = new Date();
+        plan === 'mensual' ? venc.setMonth(venc.getMonth() + 1) : venc.setDate(venc.getDate() + 7);
+        const ins = await db.execute({ sql: "INSERT INTO clientes (nombre, telefono, whatsapp_admin, tipo_bot, plan, precio, notas, fecha_vencimiento, fecha_ultimo_pago) VALUES (?,?,?,?,?,?,?,?,datetime('now'))", args: [nombre, telefono, whatsapp_admin, tipo_bot||'con_marco', plan||'semanal', precio||1000, '', venc.toISOString()] });
+        await db.execute({ sql: 'INSERT INTO licencias (cliente_id, clave, activa, fecha_vencimiento) VALUES (?,?,1,?)', args: [ins.lastInsertRowid, clave_especifica, venc.toISOString()] });
+        res.json({ success: true, clave_licencia: clave_especifica });
+    } catch(e) { res.status(500).json({ error: e.message }); }
+});
 app.get('*', (req, res) => res.sendFile(join(__dirname, 'public', 'index.html')));
 app.listen(PORT, () => console.log('Servidor en puerto ' + PORT));
