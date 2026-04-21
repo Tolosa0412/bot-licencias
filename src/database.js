@@ -4,7 +4,7 @@ import { dirname, join } from 'path';
 import bcrypt from 'bcryptjs';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
-const db = createClient({ url: `file:${join(__dirname, '..', 'licencias.db')}` });
+const db = createClient({ url: `file:${process.env.DB_PATH || join(__dirname, '..', 'data', 'licencias.db')}` });
 
 async function initDB() {
       await db.execute(`CREATE TABLE IF NOT EXISTS clientes (id INTEGER PRIMARY KEY AUTOINCREMENT, nombre TEXT NOT NULL, telefono TEXT NOT NULL, whatsapp_admin TEXT NOT NULL, tipo_bot TEXT DEFAULT 'sin_marco', plan TEXT DEFAULT 'semanal', precio REAL DEFAULT 1000, activo INTEGER DEFAULT 1, fecha_registro TEXT DEFAULT (datetime('now')), fecha_vencimiento TEXT, fecha_ultimo_pago TEXT, notas TEXT)`);
